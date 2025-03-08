@@ -1,0 +1,55 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Çevresel değişkenler (ENV) dosyası
+.env
+
+# Node.js modülleri
+node_modules/
+
+# Log dosyaları
+*.log
+
+# IDE ve editör dosyaları
+.vscode/
+.idea/
+
+# İşletim sistemi dosyaları
+.DS_Store
+
+# Build veya derleme dosyaları
+dist/
+build/
+
+# npm/yarn paket yönetimi kilidi
+package-lock.json
+yarn.lock
+
+# Test ve coverage dosyaları
+coverage/
+*.lcov
+
+# Debug logları
+debug.log
