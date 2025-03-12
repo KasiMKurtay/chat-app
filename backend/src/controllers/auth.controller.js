@@ -119,7 +119,7 @@ export const checkAuth = (req,res) => { //Kullancının oturum açığp açmadğ
   try {
     res.status(200).json(req.user)
   } catch (error) {
-    console.log("Error in chechAuth controller",error.message);
+    console.log("Error in checkAuth controller",error.message);
     res.status(500).json({message:"Internal Server Error"})
   }
 }
