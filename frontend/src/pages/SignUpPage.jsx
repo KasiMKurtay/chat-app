@@ -1,33 +1,63 @@
-import React, { useState } from "react";
- import { useAuthStore } from "../store/useAuthStore";
-import { Eye,EyeOff, Loader2, Lock, Mail, MessageSquare, User } from "lucide-react";
-import { Link } from "react-router-dom"
-import AuthImagePattern from "../components/AuthImagePattern";
+import { useState } from "react";
+import { useAuthStore } from "../store/useAuthStore";
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  Mail,
+  MessageSquare,
+  User,
+} from "lucide-react";
+import { Link } from "react-router-dom";
 
-const SettingsPage = () => {
-  const [showPassword, setShowPassword] = useState(false);
+import AuthImagePattern from "../components/AuthImagePattern";
+import toast from "react-hot-toast";
+
+const SignUpPage = () => {
+  const [showPassword, setShowPassword] = useState(false); //Şifre görünürlüğü kontrolü sağlanır
   const [formData, setFormData] = useState({
+    //kullanıcını bilgileri burada tutulur
     fullName: "",
     email: "",
     password: "",
   });
 
-  const { signup, isSigningUp } = useAuthStore();
+  const { signup, isSigningUp } = useAuthStore(); //signup(formData) kullanıcıyı kayıt eder
+  //isSigningUp işlem sırasında yükleniyor animasyonu gösterir
 
-  const validateForm = () => {};
+  const validateForm = () => {
+    if (!formData.fullName.trim()) return toast.error("Full name is required");
+    if (!formData.email.trim()) return toast.error("Email is required");
+    if (!/\S+@\S+\.\S+/.test(formData.email))
+      return toast.error("Invalid email format");
+    if (!formData.password) return toast.error("Password is required");
+    if (formData.password.length < 6)
+      return toast.error("Password must be at least 6 characters");
+
+    return true;
+  };
+
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e.preventDefault(); //Sayfanın yenilenmesini engeller
+
+    const success = validateForm(); //girişlerin geçerli olup olmadığı kontrol edilir
+
+    if (success === true) signup(formData); //geçerliyse kayıt işlemi başlatılır
   };
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
-      {/*Left Side */}
+      {/* left side */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
-          {/*LOGO */}
-          <div className="tex-center mb-8">
+          {/* LOGO */}
+          <div className="text-center mb-8">
             <div className="flex flex-col items-center gap-2 group">
-              <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <div
+                className="size-12 rounded-xl bg-primary/10 flex items-center justify-center 
+              group-hover:bg-primary/20 transition-colors"
+              >
                 <MessageSquare className="size-6 text-primary" />
               </div>
               <h1 className="text-2xl font-bold mt-2">Create Account</h1>
@@ -49,10 +79,12 @@ const SettingsPage = () => {
                 <input
                   type="text"
                   className={`input input-bordered w-full pl-10`}
-                  placeholder="Soner Keskin"
+                  placeholder="John Doe"
+                  value={formData.fullName}
                   onChange={(e) =>
                     setFormData({ ...formData, fullName: e.target.value })
                   }
+                  //onChange ile yazılan değer formData.fullName içine kaydedilir
                 />
               </div>
             </div>
@@ -65,12 +97,16 @@ const SettingsPage = () => {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="size-5 text-base-content/40" />
                 </div>
-                <input 
-                type="text"
-                className={`input input-bordered w-full pl-10`}
-                placeholder="you@exapmle.com"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email:e.target.value})}
+                <input
+                  type="email"
+                  className={`input input-bordered w-full pl-10`}
+                  placeholder="you@example.com"
+                  value={formData.email}
+                  //state'teki değeri inputa yansıtıyor
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  //state güncelleniyor
                 />
               </div>
             </div>
@@ -81,21 +117,26 @@ const SettingsPage = () => {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="size-5 text-base-content/40"/>
+                  <Lock className="size-5 text-base-content/40" />
                 </div>
-                <input 
-                type={showPassword ? "text" : "password"}
-                className={`input input-bordered w-full pl-10`}
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password:e.target.value})}
+                <input
+                  type={showPassword ? "text" : "password"}
+                  //eğer true ise düz metin false ise password olarak gizleniyor
+                  className={`input input-bordered w-full pl-10`}
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  //onChange ile state güncelleniyor
                 />
                 <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                onClick={() => setShowPassword(!showPassword)}
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
+                    //Tıklanınca tersine çevrilir false -> true <- true -> false <-
                     <EyeOff className="size-5 text-base-content/40" />
                   ) : (
                     <Eye className="size-5 text-base-content/40" />
@@ -103,38 +144,44 @@ const SettingsPage = () => {
                 </button>
               </div>
             </div>
-                  <button type="submit" className="btn btn-primary w-full" disabled={isSigningUp}>
-                    {isSigningUp ? (
-                      <>
-                      <Loader2 className="size-5 animate-spin" />
-                      Loading...
-                      </>
-                    ): (
-                      "Create Account"
-                    )}
-                  </button>
+
+            <button
+              type="submit"
+              className="btn btn-primary w-full"
+              disabled={isSigningUp}
+            >
+              {" "}
+              {/*sayesinde işlem devam ederken buton devre dışı bırakılır */}
+              {isSigningUp ? ( //true ise yükleniyor animasyonu gösterilir
+                <>
+                  <Loader2 className="size-5 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                "Create Account" //false ise bu yazı gösterilir
+              )}
+            </button>
           </form>
+
           <div className="text-center">
             <p className="text-base-content/60">
-            Already have an account? {" "}
-            <Link to="/login" className="link link-primary" >
-            Sign In
-            </Link>
+              Already have an account?{" "}
+              {/* Kullanıcının zaten hesabı varsa Sign In yazısını görür */}
+              <Link to="/login" className="link link-primary">
+                Sign in
+              </Link>
             </p>
           </div>
         </div>
       </div>
 
-      {/* Rigth Side */}
+      {/* right side */}
 
-      <AuthImagePattern 
-      title="Join our community"
-      subtitle="Connect with friends, share moments, and stay in touch with your loved ones."
-
+      <AuthImagePattern
+        title="Join our community"
+        subtitle="Connect with friends, share moments, and stay in touch with your loved ones."
       />
-
     </div>
   );
 };
-
-export default SettingsPage;
+export default SignUpPage;

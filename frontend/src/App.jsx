@@ -10,11 +10,14 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/useAuthStore'
 
 import {Loader} from "lucide-react"
+import {Toaster} from "react-hot-toast"
+import { useThemeStore } from './store/useThemeStore'
 
 
 const App = () => {
   
   const {checkAuth, isCheckingAuth, authUser} = useAuthStore();
+  const {theme} = useThemeStore()
 
   useEffect(()=> {
     checkAuth()
@@ -29,7 +32,7 @@ const App = () => {
   )
 
   return (
-    <div>
+    <div data-theme={theme}>
       <Navbar />
 
     <Routes>
@@ -39,6 +42,9 @@ const App = () => {
      <Route path='/settings' element={ <SettingsPage />}/>
      <Route path='/profile' element={authUser ? <ProfilePage /> : <Navigate to ="/login" />}/> {/*Kullanıcı giriş yapmışsa profil'e yönlendirir eğer yapmamışsa LoginPage'e yönlendirir */}
     </Routes>
+
+    <Toaster/>
+
     </div>
   )
 }
