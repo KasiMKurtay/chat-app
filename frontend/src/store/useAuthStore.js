@@ -7,8 +7,8 @@ export const useAuthStore = create((set) => ({
   isSigningUp:false, //Kayıt alma işlemi devam ediyor mu?
   isLoggingIng:false, //Giriş işlemi devam ediyor mu
   isUpdatingProfile:false,//Profil güncelleme işlemi devam ediyor mu
-
   isCheckingAuth:true, // oturum kontrolü devam ediyor mu
+  onlineUsers : [],
 
   checkAuth : async() => {
     try {
