@@ -1,76 +1,110 @@
-import {create} from "zustand"
-import { axiosInstance } from "../lib/axios"
+import { create } from "zustand";
+import { axiosInstance } from "../lib/axios.js";
 import toast from "react-hot-toast";
+import { io } from "socket.io-client";
 
-export const useAuthStore = create((set) => ({
-  authUser:null, //Kullanıcının oturum bilgisi
-  isSigningUp:false, //Kayıt alma işlemi devam ediyor mu?
-  isLoggingIng:false, //Giriş işlemi devam ediyor mu
-  isUpdatingProfile:false,//Profil güncelleme işlemi devam ediyor mu
-  isCheckingAuth:true, // oturum kontrolü devam ediyor mu
-  onlineUsers : [],
+// Geliştirme ortamı için BASE_URL ayarını yap, yoksa prod ortamı kullan
+const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
 
-  checkAuth : async() => {
+//Auth işlemlerini yönetmek için zustand oluştur
+export const useAuthStore = create((set, get) => ({
+  authUser: null, //Oturum açmış kullanıcı bilgileri
+  isSigningUp: false, // Kayıt işlemi durumunu takip et
+  isLoggingIn: false, //Giriş işlemi durumunu takip et
+  isUpdatingProfile: false, //Profil güncelleme Durumu
+  isCheckingAuth: true, //Kimlik doğrulama durumu
+  onlineUsers: [], //Çevrimiçi kullanıcılar
+  socket: null, //Socket bağlantısı
+
+  //Kullanıcının oturum açma durumunu kontrol et
+  checkAuth: async () => {
     try {
-      const res = await axiosInstance.get("/auth/check") //endpoint'e istek atıyor
-      set({authUser:res.data}) //İstek başarılıysa API'den dönen veri güncelleniyor
-    } catch (error) {
-      console.error("Error in checkAuth:", error.message)
-      set({authUser:null})//Oturumun geçerli olmadığı anlamına geliyor
-    }finally{
-      set({isCheckingAuth:false}) //Oturum kontrolünün tamamlandığını ve artık kullanıcı arayüzünün (UI) güncellenebileceğini gösterir
-    };
-  },
+      const res = await axiosInstance.get("/auth/check");
 
-  signup:async(data) => { 
-    set ({isSigningUp: true}); //Kullanıcının kayıt olma işlemi başlatıldığında true olarak değiştirir
-    try {
-    const res = await axiosInstance.post("/auth/signup", data) //API'ye kayıt olma isteği gönderilir ve kullanıcı bilgileri iletilir
-    set({authUser: res.data})// Başarıyla kayıt olunursa authUser state'i güncellenir ve kullanıcı bilgileri saklanır
-    toast.success("Account created succesfully")// Kullanıcıya başarılı kayıt mesajı gösterilir.
+      set({ authUser: res.data }); //Kullanıcı bilgilerini state'e al
+      get().connectSocket(); //Socket bağlantısı kur
     } catch (error) {
-      toast.error(error.response.data.message);//Hata oluşursa API'dan gelen mesaj gösterilir
-    } finally{
-      set({isSigningUp: false}) //Kayıt olma işlemi tamamlandığında yüklenme durumu sıfırlanır
+      console.log("Error in checkAuth:", error);
+      set({ authUser: null }); //Eğer hata alırsak kullanıcıyı null yap
+    } finally {
+      set({ isCheckingAuth: false }); //Kimlik doğrulama kontrolü tamamlandır
     }
   },
-
-  login:async(data)=> {
-    set({isLoggingIng:true}); //Kullanıcının giriş yapma işlemi başladığında true olarak yüklenme durumu gösterir
+  //Kullanıcı kaydı yap
+  signup: async (data) => {
+    set({ isSigningUp: true }); //Kayıt işlemi başladığını belirt
     try {
-      const res = await axiosInstance.post("/auth/login", data); //API'ye giriş isteği gönderilir ve kullanıcı bilgileri ileitlir
-      set({authUser: res.data}); //Giriş başarılı olursa authUser state'i güncellenir ve kullanıcı bilgileri saklanır
-      toast.success("Logged in successfully");//Kullanıcıya başarılı giriş mesajı gösterilir
+      const res = await axiosInstance.post("/auth/signup", data);
+      set({ authUser: res.data }); //Yeni kullanıcıyı state'e kaydet
+      toast.success("Account created successfully"); //Başarılı kayıt mesajı
+      get().connectSocket(); //Socket bağlantısı kurt
     } catch (error) {
-      toast.error(error.response.data.message);//Hata oluşursa, API'den gelen hata mesajı kullanıcıya gösterilir
-    }finally{
-      set({isLoggingIng:false})//Giriş işlemi tamamlandığında yüklenme durumu sıfırlanır
+      toast.error(error.response.data.message); //Hata mesajını göster
+    } finally {
+      set({ isSigningUp: false }); //Kayıt işlemi sonlandı
     }
   },
-
-  logout :async () => {
+  //Kullanıcı girişi yap
+  login: async (data) => {
+    set({ isLoggingIn: true }); //Giriş işlemi başladığını belirt
     try {
-      await axiosInstance.post("/auth/logout");//API'ye çııkış isteği gönderilir
-      set({ authUser: null }); //authUser state'i sıfırlanarak kullanıcı oturumdan çıkartılmış olur
-      toast.success("Logged out successfully"); //Kullanıcıya başarılı çıkış mesajı gösterilir
+      const res = await axiosInstance.post("/auth/login", data);
+      set({ authUser: res.data });//Kullanıcı bilgilerini state'e kaydet
+      toast.success("Logged in successfully"); //Başarılı giriş mesajı
+
+      get().connectSocket(); //Socket bağlantısını kur
     } catch (error) {
-      toast.error(error.response.data.message);//Hata oluşursa, API'den gelen hata mesajı kullanıcıya gösterilir
+      toast.error(error.response.data.message); //Hata mesajını göster
+    } finally {
+      set({ isLoggingIn: false }); //Giriş işlemi sonlandı
     }
   },
-
-  updateProfile: async(data) => {
-    set ({isUpdatingProfile:true});
+  //Kullanıcı çıkışı yap
+  logout: async () => {
     try {
-      const res = await axiosInstance.put("/auth/update-profile",data);
-      set({authUser: res.data});
-      toast.success("Profile Updated Successfully")
+      await axiosInstance.post("/auth/logout"); //Çıkış işlemi
+      set({ authUser: null }); //Kullanıcı bilgisini sıfırla
+      toast.success("Logged out successfully"); //Başarılı çıkış mesajı
+      get().disconnectSocket();// Socket bağlantısnı kes
+    } catch (error) {
+      toast.error(error.response.data.message); //Hata mesajını göster
+    }
+  },
+  //Profil resmi güncelle
+  updateProfile: async (data) => {
+    set({ isUpdatingProfile: true }); //Profil güncelleme başladığını belirt
+    try {
+      const res = await axiosInstance.put("/auth/update-profile", data);
+      set({ authUser: res.data }); //Güncellenmiş kullanıcıyı state'e kaydet
+      toast.success("Profile updated successfully");//Başarılı profil güncelleme mesajı
     } catch (error) {
       console.log("error in update profile:", error);
-      toast.error(error.response.data.message)
-    }finally{
-      set ({isUpdatingProfile:false});
+      toast.error(error.response.data.message); //Hata mesajını göstter
+    } finally {
+      set({ isUpdatingProfile: false }); //Profil güncelleme sonlandı
     }
   },
+  //Socket bağlantısını kur
+  connectSocket: () => {
+    const { authUser } = get();
+    if (!authUser || get().socket?.connected) return; //Eğer kullanıcı yoksa ya da socket zaten bağlıysa devam etme
 
-  
+    const socket = io(BASE_URL, {
+      query: {
+        userId: authUser._id, //Socket bağlantısına kullanıcı ID'sini gönder
+      },
+    });
+    socket.connect(); //Socket'i bağla
+
+    set({ socket: socket }); //Socket'i state'e kaydet
+
+    //Çevrimiçi kullanıcılar listesini al
+    socket.on("getOnlineUsers", (userIds) => {
+      set({ onlineUsers: userIds }); //Çevrimiçi kullanıcıları state'e kaydet
+    });
+  },
+  //Socket bağlantısnı kes
+  disconnectSocket: () => {
+    if (get().socket?.connected) get().socket.disconnect();//Socket bağıysa bağlantıyı kes
+  },
 }));

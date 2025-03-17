@@ -3,21 +3,26 @@ import { useAuthStore } from "../store/useAuthStore";
 import { Camera, Mail, User } from "lucide-react";
 
 const ProfilePage = () => {
+  // useAuthStore'dan kullanıcı bilgilerini ve profil güncelleme durumunu al
   const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
+  
+  // Seçilen profil resmini tutacak state
   const [selectedImg, setSelectedImg] = useState(null);
 
+  // Profil fotoğrafı yüklemek için image upload fonksiyonu
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
 
+    // Dosya okuma işlemi
     reader.readAsDataURL(file);
 
     reader.onload = async () => {
       const base64Image = reader.result;
-      setSelectedImg(base64Image);
-      await updateProfile({ profilePic: base64Image });
+      setSelectedImg(base64Image); // Seçilen resmi state'e set et
+      await updateProfile({ profilePic: base64Image }); // Kullanıcı profilini güncelle
     };
   };
 
@@ -30,10 +35,10 @@ const ProfilePage = () => {
             <p className="mt-2">Your profile information</p>
           </div>
 
-          {/* avatar upload section */}
-
+          {/* Avatar yükleme bölümü */}
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
+              {/* Profil fotoğrafı, yoksa varsayılan avatar göster */}
               <img
                 src={selectedImg || authUser.profilePic || "/avatar.png"}
                 alt="Profile"
@@ -41,24 +46,23 @@ const ProfilePage = () => {
               />
               <label
                 htmlFor="avatar-upload"
-                className={`
+                className={` 
                   absolute bottom-0 right-0 
                   bg-base-content hover:scale-105
                   p-2 rounded-full cursor-pointer 
                   transition-all duration-200
-                  ${
-                    isUpdatingProfile ? "animate-pulse pointer-events-none" : ""
-                  }
+                  ${isUpdatingProfile ? "animate-pulse pointer-events-none" : ""}
                 `}
               >
+                {/* Kamera ikonu */}
                 <Camera className="w-5 h-5 text-base-200" />
                 <input
                   type="file"
                   id="avatar-upload"
                   className="hidden"
                   accept="image/*"
-                  onChange={handleImageUpload}
-                  disabled={isUpdatingProfile}
+                  onChange={handleImageUpload} // Fotoğraf yükle
+                  disabled={isUpdatingProfile} // Profil güncelleniyorsa buton pasif
                 />
               </label>
             </div>
@@ -70,6 +74,7 @@ const ProfilePage = () => {
           </div>
 
           <div className="space-y-6">
+            {/* Kullanıcı bilgilerini göster */}
             <div className="space-y-1.5">
               <div className="text-sm text-zinc-400 flex items-center gap-2">
                 <User className="w-4 h-4" />
@@ -91,13 +96,16 @@ const ProfilePage = () => {
             </div>
           </div>
 
+          {/* Hesap bilgileri */}
           <div className="mt-6 bg-base-300 rounded-xl p-6">
             <h2 className="text-lg font-medium  mb-4">Account Information</h2>
             <div className="space-y-3 text-sm">
+              {/* Kullanıcının üyelik tarihi */}
               <div className="flex items-center justify-between py-2 border-b border-zinc-700">
                 <span>Member Since</span>
                 <span>{authUser.createdAt?.split("T")[0]}</span>
               </div>
+              {/* Hesap durumu */}
               <div className="flex items-center justify-between py-2">
                 <span>Account Status</span>
                 <span className="text-green-500">Active</span>
@@ -109,4 +117,5 @@ const ProfilePage = () => {
     </div>
   );
 };
+
 export default ProfilePage;
