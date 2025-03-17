@@ -1,19 +1,17 @@
 💬 Real-Time Chat App
-Gerçek zamanlı mesajlaşma ve kullanıcı yönetimi özelliklerine sahip bir full-stack chat uygulaması.
+A full-stack chat application with real-time messaging and user management features.
 
-🚀 Özellikler
-🔐 Kullanıcı Kayıt & Giriş (JWT tabanlı kimlik doğrulama)
-🧑‍💻 Profil Güncelleme
-💬 Gerçek Zamanlı Mesajlaşma (Socket.io ile)
-🟢 Çevrimiçi Kullanıcılar Takibi
-🎨 Tema Yönetimi (Dark/Light)
-🛠️ React, Zustand, Express, Socket.io, Axios kullanılarak geliştirilmiştir
-🖥️ Ekran Görüntüleri
-(İstersen buraya birkaç ekran görüntüsü ekleyebilirsin)
+🚀 Features
+🔐 User Registration & Login (JWT-based authentication)
+🧑‍💻 Profile Update
+💬 Real-Time Messaging (with Socket.io)
+🟢 Online Users Tracking
+🎨 Theme Management (Dark/Light)
+🛠️ Built with React, Zustand, Express, Socket.io, and Axios
 
-🧩 Teknolojiler
+🧩 Technologies
+
 Frontend:
-
 React
 Zustand (State Management)
 React Router DOM
@@ -21,22 +19,20 @@ React Hot Toast
 TailwindCSS / DaisyUI
 
 Backend:
-
 Express.js
 Socket.io
 MongoDB + Mongoose
 JWT (JSON Web Token)
-⚙️ Kurulum
-1. Projeyi Klonla
+⚙️ Installation
+1. Clone the Project
 bash
 Kopyala
 Düzenle
 git clone https://github.com/KasiMKurtay/chat-app
 cd chat-app
-2. Bağımlılıkları Kur
+2. Install Dependencies
 
 Frontend:
-
 bash
 Kopyala
 Düzenle
@@ -45,17 +41,16 @@ npm install
 npm run dev
 
 Backend:
-
 bash
 Kopyala
 Düzenle
 cd server
 npm install
 npm run dev
-3. .env Dosyaları
-Hem client hem de server dizinlerine gerekli .env dosyalarını eklemeyi unutma.
+3. .env Files
+Don’t forget to add the required .env files in both the client and server directories.
 
-📂 Proje Yapısı
+📂 Project Structure
 pgsql
 Kopyala
 Düzenle
@@ -72,6 +67,5 @@ server/
 └── server.js
 
 
-
-💻 Geliştirici: Kasım
+💻 Developer: Kasım
 🔗 https://www.linkedin.com/in/kas%C4%B1m-kurtay-08b275340/
