@@ -5,9 +5,8 @@ import cors from "cors"
 import authRoutes from "./routes/auth.route.js" // Kimlik doğrulama rotalarını içe aktarır.
 import messageRoutes from "./routes/message.route.js"
 import { connectDB } from "./lib/db.js"; // MongoDB bağlantı fonksiyonunu içe aktarır.
+import { app,server } from "./lib/socket.js";
 dotenv.config(); // `.env` dosyasındaki değişkenleri kullanabilmek için dotenv'i çalıştırır.
-
-const app = express(); // Express uygulamasını oluşturur.
 
 const PORT = process.env.PORT; // `.env` dosyasından gelen PORT değişkenini alır.
 
@@ -22,7 +21,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes); 
 // Tüm kimlik doğrulama ile ilgili rotaları "/api/auth" altında kullanılabilir hale getirir.
 
-app.listen(PORT, () => { 
+server.listen(PORT, () => { 
   console.log("Server is running on PORT " + PORT); 
   connectDB(); // Sunucu başladıktan sonra MongoDB bağlantısını başlatır.
 });
